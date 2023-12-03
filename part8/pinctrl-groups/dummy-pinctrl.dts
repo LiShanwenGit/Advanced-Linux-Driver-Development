@@ -1,0 +1,13 @@
+dummy_pincontroller {
+	compatible = "dummy-pinctrl-demo";
+	foo_uart_pin: foo_uart_pin {
+		function = "uart_func";
+		groups = "uart_group";
+	};
+};
+
+foo_uart {
+	compatible = "foo-uart-demo";
+	pinctrl-names = "default";
+	pinctrl-0 = <&foo_uart_pin>;
+};

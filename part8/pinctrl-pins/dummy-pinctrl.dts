@@ -1,0 +1,13 @@
+pinctrl:dummy_pincontroller {
+	compatible = "dummy-pinctrl-demo";
+	foo_uart_pin: foo_uart_pin {
+		function = "uart_func";
+		pins = "GPIO_0", "GPIO_1";
+	};
+};
+
+foo_uart {
+	compatible = "foo-led-demo";
+	pinctrl-names = "default";
+	pinctrl-0 = <&foo_uart_pin>;
+};

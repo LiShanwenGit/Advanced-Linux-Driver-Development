@@ -1,0 +1,25 @@
+spi_bsp: spi@5010000 {
+	compatible = "h616-spi-bsp-demo";
+	reg = <0x05011000 0x1000>;
+	interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
+	clocks = <&ccu CLK_BUS_SPI1>, <&ccu CLK_SPI1>;
+	clock-names = "ahb", "mod";
+	resets = <&ccu RST_BUS_SPI1>;
+	status = "disabled";
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+
+&spi_bsp {
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi1_pins>, <&spi1_cs0_pin>;
+	status = "okay";
+	dummy_spidev@0 {
+		status = "okay";
+		compatible = "dummy-spi-device";
+		reg = <0>;
+		spi-max-frequency = <32000000>;
+		spi-cpol;
+		spi-cpha;
+	};
+};

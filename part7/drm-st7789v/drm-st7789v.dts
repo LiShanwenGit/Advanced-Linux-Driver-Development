@@ -1,0 +1,14 @@
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi1_pins>, <&spi1_cs0_pin>;
+    st7789v@0 {
+        compatible = "drm-test";
+        reg = <0>;
+        spi-cpol;
+        spi-cpha;
+        spi-max-frequency = <50000000>;
+        reset-gpios = <&pio 2 5 GPIO_ACTIVE_HIGH>;  //PC5
+        dc-gpios = <&pio 2 8 GPIO_ACTIVE_HIGH>;     //PC8
+    };
+};

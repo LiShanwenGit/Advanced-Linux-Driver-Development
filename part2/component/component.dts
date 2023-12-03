@@ -1,0 +1,16 @@
+//将下面的代码添加到实际的dts文件中
+sub1: sub-comp1 {
+	compatible = "sub-comp1";
+	status = "okay";
+};
+
+sub2: sub-comp2 {
+	compatible = "sub-comp2";
+	status = "okay";
+};
+
+master-comp {
+	compatible = "master-comp";
+	status = "okay";
+	ports = <&sub1>, <&sub2>;
+};

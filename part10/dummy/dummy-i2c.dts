@@ -1,0 +1,17 @@
+dummy_i2c: dummy_i2cadapter {
+    compatible = "dummy-i2c-adapter";
+    status = "disabled";
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+
+&dummy_i2c {
+//	pinctrl-names = "default";
+//	pinctrl-0 = <&i2c_pins>;
+	status = "okay";
+	dummy_i2cdev@0 {
+		status = "okay";
+		compatible = "dummy-i2c-device";
+		reg = <0x05>;
+	};
+};

@@ -1,0 +1,13 @@
+/ {
+    ...
+    hotplug_test: hotplug-led {
+        matching = "hotplug-led-ctl";
+        check-gpios = <&pio 2 5 GPIO_ACTIVE_HIGH>;  /* PC5 用作插拔检测 */
+        hotplug-led {
+            matching = "hotplug-led-demo";
+            on_off-gpios = <&pio 2 6 GPIO_ACTIVE_HIGH>;  /* PC6 用作驱动LED */
+            removable;
+        };
+    };
+    ...
+};

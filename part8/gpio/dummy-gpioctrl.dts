@@ -1,0 +1,20 @@
+pinctrl: dummy_pincontroller {
+	compatible = "dummy-pinctrl-demo";
+	foo_uart_pin: foo_uart_pin {
+		function = "uart_func";
+		groups = "uart_group";
+	};
+};
+
+gpio: dummy_gpiocontroller {
+	compatible = "dummy-gpioctrl";
+    gpio-controller;
+    #gpio-cells = <2>;
+	/* 在pinctrl中获取32个引脚全部作为GPIO */
+	gpio-ranges = <&pinctrl 0 0 32>;
+};
+
+foo_led {
+	compatible = "foo-led-demo";
+	led-gpios = <&gpio 0 2>; //GPIO_A2
+};

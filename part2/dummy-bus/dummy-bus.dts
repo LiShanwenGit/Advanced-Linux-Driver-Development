@@ -1,0 +1,23 @@
+/ {
+    model = "OrangePi Zero2";
+    compatible = "xunlong,orangepi-zero2", "allwinner,sun50i-h616";
+    aliases {
+        ethernet0 = &emac0;
+        serial0 = &uart0;
+    };
+    chosen {
+        stdout-path = "serial0:115200n8";
+    };
+    ...
+    dummy-demo-ctrl@0 {
+        dummy-compatible = "dummy-demo-ctrl";
+        data1-gpios = <&pio 2 5 GPIO_ACTIVE_HIGH>;
+        data2-gpios = <&pio 2 6 GPIO_ACTIVE_HIGH>;
+        dummy-demo-dev@0 {
+            dummy-compatible = "dummy-demo-dev";
+            led-gpios = <&pio 2 7 GPIO_ACTIVE_HIGH>;
+            removable;
+        };
+    };
+    ...
+};
