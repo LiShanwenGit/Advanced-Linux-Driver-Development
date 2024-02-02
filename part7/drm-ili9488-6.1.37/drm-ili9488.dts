@@ -1,0 +1,18 @@
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi1_pins>, <&spi1_cs0_pin>;
+    ili9488@0 {
+        compatible = "ilitek,ili9488";
+        reg = <0>;
+        spi-cpol;
+        spi-cpha;
+        width = <480>;
+        height = <320>;
+        width-mm = <83>;
+        height-mm = <55>;
+        spi-max-frequency = <50000000>;
+        reset-gpios = <&pio 2 5 GPIO_ACTIVE_HIGH>;  //PC5
+        dc-gpios = <&pio 2 8 GPIO_ACTIVE_HIGH>;     //PC8
+    };
+};

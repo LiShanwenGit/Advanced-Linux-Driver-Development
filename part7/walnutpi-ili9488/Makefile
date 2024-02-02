@@ -1,8 +1,8 @@
-KERN_DIR = /home/lsw/h616/linux-6.1.37
+KERN_DIR = /home/lsw/linux
 all:
 	make -C $(KERN_DIR) M=$(shell pwd) modules 
 
 clean:
 	rm -rf *.order *o *.symvers *.mod.c *.mod *.ko .*.cmd
 
-obj-m += drm-st7789v.o
+obj-m += drm-ili9488.o

@@ -30,6 +30,11 @@
 #include <linux/iosys-map.h>
 
 
+#define DISPLAY_XRES_DEFAULT    480
+#define DISPLAY_YRES_DEFAULT    320
+#define DISPLAY_X_WIDTH         83
+#define DISPLAY_X_HEIGHT        55
+
 struct drm_display {
 	struct spi_device    *spi;
 	struct gpio_desc     *reset;
@@ -50,90 +55,128 @@ static void fb_write_reg(struct drm_display *drm, u8 reg)
     spi_write(spi, &reg, 1);
 }
 
-static void fb_write_data(struct drm_display *drm, u16 data)
+static void fb_write_data(struct drm_display *drm, u8 data)
 {   
 	struct spi_device *spi = drm->spi;
-    u8 buf[2];
-    buf[0] = ((u8)(data>>8));
-    buf[1] = ((u8)(data&0x00ff));
     gpiod_set_value(drm->dc, 1);  //高电平，数据
-    spi_write(spi, &buf[0], 1);
-    spi_write(spi, &buf[1], 1);   
+    spi_write(spi, &data, 1);
 }
 
-static void fb_set_win(struct drm_display *drm, u8 xStar, u8 yStar,u8 xEnd,u8 yEnd)
+static void fb_set_win(struct drm_display *drm, u16 xStar, u16 yStar, u16 xEnd, u16 yEnd)
 {
-    fb_write_reg(drm,0x2a);   
-    fb_write_data(drm,xStar);
-    fb_write_data(drm,xEnd);
-    fb_write_reg(drm,0x2b);   
-    fb_write_data(drm,yStar);
-    fb_write_data(drm,yEnd);
-    fb_write_reg(drm,0x2c); 
+    fb_write_reg(drm, 0x2a);
+    fb_write_data(drm, (xStar >> 8) & 0xff);
+	fb_write_data(drm, xStar & 0xff);
+    fb_write_data(drm, (xEnd >> 8) & 0xff);
+	fb_write_data(drm, xEnd & 0xff);
+    fb_write_reg(drm, 0x2b); 
+    fb_write_data(drm, (yStar >> 8) & 0xff);
+	fb_write_data(drm, yStar & 0xff );
+    fb_write_data(drm, (yEnd >> 8) & 0xff);
+	fb_write_data(drm, yEnd & 0xff);
+    fb_write_reg(drm, 0x2c); 
 }
 
 static void myfb_init(struct drm_display *drm)
 {
     gpiod_set_value(drm->reset, 0); //设低电平
-    msleep(100);
+    msleep(300);
     gpiod_set_value(drm->reset, 1); //设高电平
-    msleep(50);
-	/* 写寄存器，初始化 */
-    fb_write_reg(drm,0x36);
-    fb_write_data(drm,0x0000);
-    fb_write_reg(drm,0x3A);
-    fb_write_data(drm,0x0500);
-    fb_write_reg(drm,0xB2);
-    fb_write_data(drm,0x0C0C);
-    fb_write_data(drm,0x0033);
-    fb_write_data(drm,0x3300);
-    fb_write_data(drm,0x0033);
-    fb_write_data(drm,0x3300);
-    fb_write_reg(drm,0xB7);
-    fb_write_data(drm,0x3500);
-    fb_write_reg(drm,0xB8);
-    fb_write_data(drm,0x1900);
-    fb_write_reg(drm,0xC0);
-    fb_write_data(drm,0x2C00);
-    fb_write_reg(drm,0xC2);
-    fb_write_data(drm,0xC100);
-    fb_write_reg(drm,0xC3);
-    fb_write_data(drm,0x1200);
-    fb_write_reg(drm,0xC4);
-    fb_write_data(drm,0x2000);
-    fb_write_reg(drm,0xC6);
-    fb_write_data(drm,0x0F00);
-    fb_write_reg(drm,0xD0);
-    fb_write_data(drm,0xA4A1);
-    fb_write_reg(drm,0xE0);
-    fb_write_data(drm,0xD004);
-    fb_write_data(drm,0x0D11);
-    fb_write_data(drm,0x132B);
-    fb_write_data(drm,0x3F54);
-    fb_write_data(drm,0x4C18);
-    fb_write_data(drm,0x0D0B);
-    fb_write_data(drm,0x1F23);
-    fb_write_reg(drm,0xE1);
-    fb_write_data(drm,0xD004);
-    fb_write_data(drm,0x0C11);
-    fb_write_data(drm,0x132C);
-    fb_write_data(drm,0x3F44);
-    fb_write_data(drm,0x512F);
-    fb_write_data(drm,0x1F1F);
-    fb_write_data(drm,0x2023);
-    fb_write_reg(drm,0x21);
-    fb_write_reg(drm,0x11);
-    mdelay(50);  
-    fb_write_reg(drm,0x29);
+    msleep(300);
+
+    /*   写寄存器，初始化*/
+
+    fb_write_reg(drm, 0xf7);
+    fb_write_data(drm, 0xa9);
+    fb_write_data(drm, 0x51);
+    fb_write_data(drm, 0x2c);
+    fb_write_data(drm, 0x82);
+
+    fb_write_reg(drm, 0xc0);
+    fb_write_data(drm, 0x11);
+    fb_write_data(drm, 0x09);
+
+    fb_write_reg(drm, 0xc1);
+    fb_write_data(drm, 0x41);
+
+    fb_write_reg(drm, 0xc5);
+    fb_write_data(drm, 0x00);
+    fb_write_data(drm, 0x0a);
+    fb_write_data(drm, 0x80);
+
+    fb_write_reg(drm, 0xb1);
+    fb_write_data(drm, 0xB0);
+    fb_write_data(drm, 0x11);
+
+    fb_write_reg(drm, 0xb4);
+    fb_write_data(drm, 0x02);
+
+    fb_write_reg(drm, 0xb6);
+    fb_write_data(drm, 0x02);
+    fb_write_data(drm, 0x42);
+
+    fb_write_reg(drm, 0xb7);
+    fb_write_data(drm, 0xc6);
+
+    fb_write_reg(drm, 0xbe);
+    fb_write_data(drm, 0x00);
+    fb_write_data(drm, 0x04);
+
+    fb_write_reg(drm, 0xe9);
+    fb_write_data(drm, 0x00);
+
+    fb_write_reg(drm, 0x36);
+    fb_write_data(drm, (1<<3)|(0<<7)|(1<<6)|(1<<5));
+
+    fb_write_reg(drm, 0x3a);
+    fb_write_data(drm, 0x66);
+
+    fb_write_reg(drm, 0xe0);
+    fb_write_data(drm, 0x00);
+    fb_write_data(drm, 0x07);
+    fb_write_data(drm, 0x10);
+    fb_write_data(drm, 0x09);
+    fb_write_data(drm, 0x17);
+    fb_write_data(drm, 0x0b);
+    fb_write_data(drm, 0x41);
+    fb_write_data(drm, 0x89);
+    fb_write_data(drm, 0x4b);
+    fb_write_data(drm, 0x0a);
+    fb_write_data(drm, 0x0c);
+    fb_write_data(drm, 0x0e);
+    fb_write_data(drm, 0x18);
+    fb_write_data(drm, 0x1b);
+    fb_write_data(drm, 0x0f);
+
+    fb_write_reg(drm, 0xe1);
+    fb_write_data(drm, 0x00);
+    fb_write_data(drm, 0x17);
+    fb_write_data(drm, 0x1a);
+    fb_write_data(drm, 0x04);
+    fb_write_data(drm, 0x0e);
+    fb_write_data(drm, 0x06);
+    fb_write_data(drm, 0x2f);
+    fb_write_data(drm, 0x45);
+    fb_write_data(drm, 0x43);
+    fb_write_data(drm, 0x02);
+    fb_write_data(drm, 0x0a);
+    fb_write_data(drm, 0x09);
+    fb_write_data(drm, 0x32);
+    fb_write_data(drm, 0x36);
+    fb_write_data(drm, 0x0f);
+    
+    fb_write_reg(drm, 0x11);
+    mdelay(50);
+    fb_write_reg(drm, 0x29);
     mdelay(200);
 }
 
-static const struct drm_display_mode st7789v_mode = {
-	//宽度像素240，高度像素240，宽度尺寸23.4mm，高度尺寸23.4mm
-	DRM_SIMPLE_MODE(240, 240, 23, 23),
+static struct drm_display_mode ili9488_mode = {
+	//宽度像素480，高度像素320，宽度尺寸83mm，高度尺寸55mm
+	DRM_SIMPLE_MODE(DISPLAY_XRES_DEFAULT, DISPLAY_YRES_DEFAULT, DISPLAY_X_WIDTH, DISPLAY_X_HEIGHT),
 };
 
-static const u32 st7789v_formats[] = {
+static const u32 ili9488_formats[] = {
 	DRM_FORMAT_RGB565,
 	DRM_FORMAT_XRGB8888,
 };
@@ -227,7 +270,7 @@ static const struct drm_mode_config_funcs mode_config_funcs = {
 static enum drm_mode_status crtc_helper_mode_valid(struct drm_crtc *crtc,
 			       const struct drm_display_mode *mode)
 {
-	return drm_crtc_helper_mode_valid_fixed(crtc, mode, &st7789v_mode);
+	return drm_crtc_helper_mode_valid_fixed(crtc, mode, &ili9488_mode);
 }
 
 static int drm_atomic_crtc_check(struct drm_crtc *crtc,
@@ -278,7 +321,7 @@ static const struct drm_encoder_funcs encoder_funcs = {
 
 static int connector_helper_get_modes(struct drm_connector *connector)
 {
-	return drm_connector_helper_get_modes_fixed(connector, &st7789v_mode);
+	return drm_connector_helper_get_modes_fixed(connector, &ili9488_mode);
 }
 
 static const struct drm_connector_helper_funcs connector_helper_funcs = {
@@ -310,51 +353,99 @@ static struct drm_driver test_driver = {
 	.driver_features	= DRIVER_GEM | DRIVER_MODESET | DRIVER_ATOMIC,
     .fops           = &drm_fops,
 	DRM_GEM_DMA_DRIVER_OPS_VMAP,
-	.name			= "drm-st7789v",
-	.desc			= "drm st7789v test",
-	.date			= "20230627",
+	.name			= "drm-ili9488",
+	.desc			= "drm ili9488 display",
+	.date			= "20240202",
 	.major			= 1,
 	.minor			= 0,
 };
 
-static int drm_st7789v_probe(struct spi_device *spi)
+static int hd;
+static int vd;
+static int hd_mm;
+static int vd_mm;
+module_param_named(hd,hd,int,0644);
+module_param_named(vd,vd,int,0644);
+module_param_named(hd_mm,hd_mm,int,0644);
+module_param_named(vd_mm,vd_mm,int,0644);
+MODULE_PARM_DESC(hd, "Horizontal resolution, width");
+MODULE_PARM_DESC(vd, "Vertical resolution, height");
+MODULE_PARM_DESC(hd_mm, "Display width in millimeters");
+MODULE_PARM_DESC(vd_mm, "Display height in millimeters");
+
+static int drm_ili9488_probe(struct spi_device *spi)
 {
 	int ret;
-	struct drm_display *drm_st7789v;
+	struct drm_display *drm_ili9488;
 	struct device *dev = &spi->dev;
 	struct drm_device *drm_dev;
 	struct drm_plane  *primary;
 	struct drm_crtc   *crtc;
 	struct drm_encoder *encoder;
 	struct drm_connector *connector;
+	u32 width, height, width_mm, height_mm;
 
-	drm_st7789v = devm_drm_dev_alloc(dev, &test_driver, struct drm_display, drm_dev);
-	if(drm_st7789v == NULL) {
+	drm_ili9488 = devm_drm_dev_alloc(dev, &test_driver, struct drm_display, drm_dev);
+	if(drm_ili9488 == NULL) {
 		printk(KERN_ERR "struct drm_display alloc filed\n");
 		return -ENOMEM;
 	}
-	drm_st7789v->reset = devm_gpiod_get(dev,"reset",GPIOD_OUT_HIGH);
-	if (IS_ERR(drm_st7789v->reset))
-		return dev_err_probe(dev, PTR_ERR(drm_st7789v->reset), "Failed to get GPIO 'reset'\n");
+	drm_ili9488->reset = devm_gpiod_get(dev,"reset",GPIOD_OUT_HIGH);
+	if (IS_ERR(drm_ili9488->reset))
+		return dev_err_probe(dev, PTR_ERR(drm_ili9488->reset), "Failed to get GPIO 'reset'\n");
 
-	drm_st7789v->dc = devm_gpiod_get(dev,"dc",GPIOD_OUT_LOW);
-	if (IS_ERR(drm_st7789v->dc))
-		return dev_err_probe(dev, PTR_ERR(drm_st7789v->dc), "Failed to get GPIO 'dc'\n");
-	gpiod_direction_output(drm_st7789v->reset, 0);
-	gpiod_direction_output(drm_st7789v->dc, 0);
-	
-	drm_st7789v->spi = spi;
-	drm_dev = &drm_st7789v->drm_dev;
+	drm_ili9488->dc = devm_gpiod_get(dev,"dc",GPIOD_OUT_LOW);
+	if (IS_ERR(drm_ili9488->dc))
+		return dev_err_probe(dev, PTR_ERR(drm_ili9488->dc), "Failed to get GPIO 'dc'\n");
+	gpiod_direction_output(drm_ili9488->reset, 0);
+	gpiod_direction_output(drm_ili9488->dc, 0);
+
+	if(device_property_read_u32(dev, "width", &width) ||
+		device_property_read_u32(dev, "height", &height) ||
+		device_property_read_u32(dev, "width-mm", &width_mm) ||
+		device_property_read_u32(dev, "height-mm", &height_mm)
+	) {
+		//设备树中没有width属性和height属性以及width-mm属性和height-mm
+		if((hd > 0) && (vd > 0) && (hd_mm > 0) && (vd_mm > 0)) { //获取模块参数
+			ili9488_mode.hdisplay = hd;
+			ili9488_mode.vdisplay = vd;
+			ili9488_mode.width_mm = hd_mm;
+			ili9488_mode.height_mm = vd_mm;
+			dev_info(dev, "Horizontal resolution         :%d", hd);
+			dev_info(dev, "Vertical resolution           :%d", vd);
+			dev_info(dev, "Display width in millimeters  :%d", hd_mm);
+			dev_info(dev, "Display height in millimeters :%d", vd_mm);
+		}
+		else {
+			dev_info(dev, "[Default] Horizontal resolution         :DISPLAY_XRES_DEFAULT");
+			dev_info(dev, "[Default] Vertical resolution           :DISPLAY_YRES_DEFAULT");
+			dev_info(dev, "[Default] Display width in millimeters  :DISPLAY_X_WIDTH");
+			dev_info(dev, "[Default] Display height in millimeters :DISPLAY_X_HEIGHT");
+		}
+	}
+	else {
+		ili9488_mode.hdisplay = width;
+		ili9488_mode.vdisplay = height;
+		ili9488_mode.width_mm = width_mm;
+		ili9488_mode.height_mm = height_mm;
+		dev_info(dev, "Horizontal resolution         :%d", width);
+		dev_info(dev, "Vertical resolution           :%d", height);
+		dev_info(dev, "Display width in millimeters  :%d", width_mm);
+		dev_info(dev, "Display height in millimeters :%d", height_mm);
+	}
+
+	drm_ili9488->spi = spi;
+	drm_dev = &drm_ili9488->drm_dev;
 	//分配内存用于LCD显存
-	drm_st7789v->buffer = kzalloc(st7789v_mode.hdisplay * st7789v_mode.vdisplay * 2, GFP_KERNEL);
-	if(drm_st7789v->buffer == NULL) {
+	drm_ili9488->buffer = kzalloc(ili9488_mode.hdisplay * ili9488_mode.vdisplay * 2, GFP_KERNEL);
+	if(drm_ili9488->buffer == NULL) {
  		printk(KERN_ERR "buffer alloc failed\n");
         return -ENOMEM;
 	}
-	primary   = &(drm_st7789v->primary);
-	crtc      = &(drm_st7789v->crtc);
-	encoder   = &(drm_st7789v->encoder);
-	connector = &(drm_st7789v->connector);
+	primary   = &(drm_ili9488->primary);
+	crtc      = &(drm_ili9488->crtc);
+	encoder   = &(drm_ili9488->encoder);
+	connector = &(drm_ili9488->connector);
 
 	dma_coerce_mask_and_coherent(dev, DMA_BIT_MASK(32));
 
@@ -373,7 +464,7 @@ static int drm_st7789v_probe(struct spi_device *spi)
   
 	drm_plane_helper_add(primary, &plane_helper_funcs);
     ret = drm_universal_plane_init(drm_dev, primary, 0, &plane_funcs,
-				                st7789v_formats, ARRAY_SIZE(st7789v_formats),
+				                ili9488_formats, ARRAY_SIZE(ili9488_formats),
 				                modifiers, DRM_PLANE_TYPE_PRIMARY, NULL);
     if(ret) {
         printk(KERN_ERR "drm_universal_plane_init failed\n");
@@ -403,10 +494,10 @@ static int drm_st7789v_probe(struct spi_device *spi)
 	drm_plane_enable_fb_damage_clips(primary);
 
 	drm_dev->mode_config.funcs = &mode_config_funcs;
-	drm_dev->mode_config.min_width = st7789v_mode.hdisplay;
-	drm_dev->mode_config.max_width = st7789v_mode.hdisplay;
-	drm_dev->mode_config.min_height = st7789v_mode.vdisplay;
-	drm_dev->mode_config.max_height = st7789v_mode.vdisplay;
+	drm_dev->mode_config.min_width = ili9488_mode.hdisplay;
+	drm_dev->mode_config.max_width = ili9488_mode.hdisplay;
+	drm_dev->mode_config.min_height = ili9488_mode.vdisplay;
+	drm_dev->mode_config.max_height = ili9488_mode.vdisplay;
 
 	drm_mode_config_reset(drm_dev);
     ret = drm_dev_register(drm_dev, 0);
@@ -414,40 +505,40 @@ static int drm_st7789v_probe(struct spi_device *spi)
         printk(KERN_ERR "drm_dev register failed\n");
         return ret;
     }
-	spi_set_drvdata(spi, drm_st7789v);
+	spi_set_drvdata(spi, drm_ili9488);
 	//设置fb的颜色深度为16位，即RGB5654
 	//也可以直接赋值drm_dev->mode_config.preferred_depth = 16;
 	drm_fbdev_generic_setup(drm_dev, 16);
 	return 0;
 }
 
-static void drm_st7789v_remove(struct spi_device *spi)
+static void drm_ili9488_remove(struct spi_device *spi)
 {
-	struct drm_display *drm_st7789v = spi_get_drvdata(spi);
+	struct drm_display *drm_ili9488 = spi_get_drvdata(spi);
 	spi_set_drvdata(spi, NULL);
-	devm_gpiod_put(&spi->dev, drm_st7789v->dc);
-	devm_gpiod_put(&spi->dev, drm_st7789v->reset);
-    drm_dev_unplug(&drm_st7789v->drm_dev);
-	kfree(drm_st7789v->buffer);
+	devm_gpiod_put(&spi->dev, drm_ili9488->dc);
+	devm_gpiod_put(&spi->dev, drm_ili9488->reset);
+    drm_dev_unplug(&drm_ili9488->drm_dev);
+	kfree(drm_ili9488->buffer);
 }
 
 static const struct of_device_id drm_test_match[] = {
-	{ .compatible = "drm-test" },
+	{ .compatible = "ilitek,ili9488" },
 	{},
 };
 
-static struct spi_driver drm_test_driver = {
+static struct spi_driver drm_driver = {
 	.driver = {
-		.name = "drm-test-st7789v",
+		.name = "ili9488",
 		.of_match_table = drm_test_match,
 	},
-	.probe = drm_st7789v_probe,
-	.remove = drm_st7789v_remove,
+	.probe = drm_ili9488_probe,
+	.remove = drm_ili9488_remove,
 };
 
-module_spi_driver(drm_test_driver);
+module_spi_driver(drm_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("1477153217@qq.com");   
 MODULE_VERSION("0.1");
-MODULE_DESCRIPTION("drm st7789v test"); 
+MODULE_DESCRIPTION("drm ili9488 display"); 

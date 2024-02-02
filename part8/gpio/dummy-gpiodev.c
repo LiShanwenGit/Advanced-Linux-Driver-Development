@@ -51,7 +51,6 @@ static int dummy_gpioctrl_dev_probe(struct platform_device *pdev)
 static int dummy_gpioctrl_dev_remove(struct platform_device *pdev)
 {
     gpiod_put(led_pin);
-    //gpio_free(600);
     printk(KERN_INFO "remove dummy_gpioctrl_dev_remove\n");
 	return 0;
 }

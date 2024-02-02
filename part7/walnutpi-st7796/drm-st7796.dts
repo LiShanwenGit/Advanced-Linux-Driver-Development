@@ -1,0 +1,14 @@
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi1_pins>, <&spi1_cs_pin>;
+    st7796v@0 {
+        compatible = "walnutpi,st7796";
+        reg = <0>;
+        spi-cpol;
+        spi-cpha;
+        spi-max-frequency = <70000000>;
+        reset-gpios = <&pio 2 15 GPIO_ACTIVE_HIGH>;  //PC15
+        dc-gpios = <&pio 2 14 GPIO_ACTIVE_HIGH>;     //PC14
+    };
+};
